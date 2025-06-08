@@ -1,0 +1,44 @@
+version: '3.8' # Specify docker-compose version
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    # If you wanted to persist the SQLite database across container restarts/recreations:
+    # volumes:
+    #   - ./backend_data:/app # Mount a host directory into the container where the db is stored
+    # Ensure asset_management.db is written to /app/asset_management.db in backend/database.py
+    # Or, even better, use a named volume:
+    # volumes:
+    #   - backend_db_data:/app # (and define backend_db_data in top-level 'volumes' section)
+    # For now, the database will be ephemeral, created inside the container.
+    container_name: asset-management-backend
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Map host port 3000 to container port 3000
+    environment:
+      # Service discovery: frontend can reach backend at http://backend:8000
+      NEXT_PUBLIC_API_BASE_URL: http://backend:8000
+      # NODE_ENV: production # This is already set in the frontend Dockerfile
+    depends_on:
+      - backend # Wait for backend to be "ready" (doesn't guarantee app inside is fully up)
+    container_name: asset-management-frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+# Optional: Define a named volume for persistent database storage if you uncomment the volume section for backend
+# volumes:
+#   backend_db_data:

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+*.sqlite3 # If you want to exclude the dev database
+*.db # General db extension
+asset_management.db # Specific dev database file
